@@ -1,34 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Notion Light Theme (from DESIGN.md) */
+  --canvas: 0 0% 100%;       /* #ffffff */
+  --surface: 36 29% 97%;     /* #f6f5f4 */
+  --surface-soft: 60 11% 98%;/* #fafaf9 */
+  
+  --primary: 247 61% 55%;    /* #5645d4 */
+  --primary-hover: 247 55% 45%;/* #4534b3 */
+  
+  --text-main: 0 0% 10%;     /* #1a1a1a */
+  --charcoal: 60 4% 20%;     /* #37352f */
+  --slate: 48 5% 35%;        /* #5d5b54 */
+  --text-muted: 42 6% 71%;   /* #bbb8b1 */
+  
+  --border: 36 12% 89%;      /* #e5e3df */
+  --border-strong: 36 9% 76%;/* #c8c4be */
+  
+  --radius-sm: 6px;
+  --radius-md: 8px;          /* Buttons, Inputs */
+  --radius-lg: 12px;         /* Cards */
+  --radius-xl: 16px;
+  
+  /* Tint Backgrounds */
+  --tint-peach: 28 100% 92%; /* #ffe8d4 */
+  --tint-mint: 138 52% 90%;  /* #d9f3e1 */
+  --tint-yellow: 49 97% 92%; /* #fef7d6 */
+
+  /* Minimal Shadows */
+  --shadow-subtle: 0px 1px 2px 0px rgba(15, 15, 15, 0.04);
+  --shadow-card: 0px 4px 12px 0px rgba(15, 15, 15, 0.08);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html {
-  height: 100%;
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+[data-theme='dark'] {
+  /* Minimal Dark Theme (Notion-like) */
+  --canvas: 0 0% 10%;        /* #191919 */
+  --surface: 0 0% 12%;       /* #202020 */
+  --surface-soft: 0 0% 15%;  /* #252525 */
+  
+  --primary: 247 61% 65%;
+  --primary-hover: 247 55% 55%;
+  
+  --text-main: 0 0% 90%;
+  --charcoal: 0 0% 85%;
+  --slate: 0 0% 70%;
+  --text-muted: 0 0% 50%;
+  
+  --border: 0 0% 20%;
+  --border-strong: 0 0% 30%;
+  
+  --tint-peach: 20 40% 20%;
+  --tint-mint: 140 30% 20%;
+  --tint-yellow: 50 40% 20%;
+  
+  --shadow-subtle: 0px 1px 2px 0px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0px 4px 12px 0px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -37,13 +63,174 @@ body {
   margin: 0;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: hsl(var(--canvas));
+  color: hsl(var(--text-main));
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+/* Base Elements */
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, textarea, select { font-family: inherit; }
+
+/* Notion Typography Hierarchy */
+h1, h2, h3, h4, h5, h6 {
+  color: hsl(var(--text-main));
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+h1 { font-size: 36px; } /* heading-2 from design */
+h2 { font-size: 28px; } /* heading-3 from design */
+h3 { font-size: 22px; } /* heading-4 from design */
+
+p {
+  line-height: 1.55;
+}
+
+/* Layout Utilities (No more glassmorphism) */
+.glass {
+  background: hsl(var(--surface-soft));
+  border: 1px solid hsl(var(--border));
+}
+
+.glass-panel {
+  background: hsl(var(--canvas));
+  border: 1px solid hsl(var(--border));
+  box-shadow: var(--shadow-card);
+}
+
+/* Cards */
+.card {
+  background-color: hsl(var(--canvas));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-lg);
+  padding: 24px; /* spacing.xl */
+  box-shadow: none; /* Default cards are flat */
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-subtle);
+}
+
+/* Notion Premium Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--radius-md); /* Rectangular, not pills */
+  transition: all 0.2s ease;
+  gap: 8px;
+  line-height: 1.3;
+}
+
+.btn-primary {
+  background-color: hsl(var(--primary));
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: hsl(var(--primary-hover));
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: hsl(var(--charcoal));
+  border: 1px solid hsl(var(--border-strong));
+}
+
+.btn-secondary:hover {
+  background-color: hsl(var(--surface-soft));
+}
+
+/* Premium Inputs */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  font-size: 13px; /* caption */
+  font-weight: 600;
+  color: hsl(var(--slate));
+}
+
+.input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid hsl(var(--border-strong));
+  background-color: hsl(var(--canvas));
+  color: hsl(var(--text-main));
+  font-size: 16px; /* body-md */
+  font-weight: 400;
+  height: 44px;
+  transition: border-color 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border: 2px solid hsl(var(--primary));
+  padding: 11px 15px; /* Offset for 2px border */
+}
+
+.input::placeholder {
+  color: hsl(var(--text-muted));
+}
+
+/* Utilities */
+.text-gradient {
+  color: hsl(var(--text-main)); /* Remove gradients for Notion style */
+}
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-2 { gap: 8px; }
+.gap-4 { gap: 16px; }
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+.h-screen { height: 100vh; }
+.text-center { text-align: center; }
+.mt-4 { margin-top: 16px; }
+.mb-4 { margin-bottom: 16px; }
+.text-sm { font-size: 14px; }
+.text-xs { font-size: 12px; }
+.text-muted { color: hsl(var(--text-muted)); }
+.font-medium { font-weight: 500; }
+.font-bold { font-weight: 600; }
+.grid { display: grid; }
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+@media (min-width: 768px) {
+  .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border-strong));
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--text-muted));
 }
