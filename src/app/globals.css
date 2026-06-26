@@ -234,3 +234,18 @@ p {
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--text-muted));
 }
+
+/* Responsive Utilities */
+@media (min-width: 768px) {
+  .md\:flex { display: flex !important; }
+  .md\:hidden { display: none !important; }
+  .md\:block { display: block !important; }
+  .md\:p-8 { padding: 32px !important; }
+}
+@media (max-width: 767px) {
+  .mobile-hidden { display: none !important; }
+  .mobile-flex { display: flex !important; }
+  .mobile-block { display: block !important; }
+  .mobile-p-4 { padding: 16px !important; }
+  .card { padding: 16px; } /* Smaller card padding on mobile */
+}

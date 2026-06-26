@@ -18,6 +18,14 @@ export default function AgendaPage() {
   // Views and Calendar states
   const [viewMode, setViewMode] = useState('calendar'); // 'list' or 'calendar'
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -119,6 +127,42 @@ export default function AgendaPage() {
   };
 
   const renderCalendarView = () => {
+    // Si es móvil y estamos en modo calendario, mostramos la "Lista de 1 día" (Día actual navegado)
+    if (isMobile) {
+      const dayActivities = activities.filter(a => a.fechaHora && isSameDay(new Date(a.fechaHora), currentDate));
+      return (
+        <div className="card glass-panel" style={{ padding: '16px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px', color: 'hsl(var(--primary))' }}>
+            Eventos del {format(currentDate, "d 'de' MMMM", { locale: es })}
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {dayActivities.length === 0 ? (
+              <p className="text-muted text-sm text-center py-8">No hay actividades programadas para este día.</p>
+            ) : (
+              dayActivities.map(act => {
+                const bg = act.categoria === 'Misa' ? 'var(--tint-lavender)' : (act.categoria === 'Sacramento' ? 'var(--tint-mint)' : 'var(--tint-peach)');
+                const color = act.categoria === 'Misa' ? 'hsl(var(--primary))' : (act.categoria === 'Sacramento' ? 'hsl(140 30% 30%)' : 'hsl(20 60% 30%)');
+                return (
+                  <div key={act.id} onClick={() => setSelectedActivity(act)} style={{ 
+                    padding: '12px', borderRadius: '8px', backgroundColor: `hsl(${bg})`, 
+                    borderLeft: `4px solid ${color}`, cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '4px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: '600', color: color, fontSize: '14px' }}>{format(new Date(act.fechaHora), 'HH:mm')}</span>
+                      <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '4px', backgroundColor: 'rgba(255,255,255,0.5)', color: color, fontWeight: '600' }}>{act.estado}</span>
+                    </div>
+                    <span style={{ fontWeight: '600', fontSize: '15px', color: 'hsl(var(--text-main))' }}>{act.tipo}</span>
+                    <span style={{ fontSize: '13px', color: 'hsl(var(--slate))' }}>{act.lugar}</span>
+                  </div>
+                )
+              })
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Desktop Month Grid
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
     const startDate = startOfWeek(monthStart, { weekStartsOn: 0 }); // Sunday
@@ -299,12 +343,12 @@ export default function AgendaPage() {
         </div>
 
         {viewMode === 'calendar' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', width: isMobile ? '100%' : 'auto', justifyContent: isMobile ? 'space-between' : 'flex-start' }}>
             <button onClick={today} className="btn btn-secondary" style={{ padding: '6px 12px' }}>Hoy</button>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <button onClick={prevMonth} className="btn btn-secondary" style={{ padding: '6px', borderRadius: '50%' }}><ChevronLeft size={18}/></button>
-              <h2 style={{ fontSize: '16px', width: '140px', textAlign: 'center', margin: 0 }}>
-                {format(currentDate, 'MMMM yyyy', { locale: es })}
+              <h2 style={{ fontSize: '15px', width: isMobile ? '120px' : '140px', textAlign: 'center', margin: 0, fontWeight: '600' }}>
+                {format(currentDate, isMobile ? "dd MMM yyyy" : "MMMM yyyy", { locale: es })}
               </h2>
               <button onClick={nextMonth} className="btn btn-secondary" style={{ padding: '6px', borderRadius: '50%' }}><ChevronRight size={18}/></button>
             </div>
