@@ -41,10 +41,10 @@ export default function LoginPage() {
   return (
     <div className="flex items-center justify-center h-screen" style={{ backgroundColor: 'hsl(var(--surface))' }}>
       
-      <div className="card glass-panel animate-fade-in" style={{ width: '100%', maxWidth: '420px', margin: '16px', display: 'flex', flexDirection: 'column', zIndex: 10, padding: '48px 32px' }}>
-        <div className="text-center mb-8">
-          <h1 style={{ fontSize: '28px', marginBottom: '8px', color: 'hsl(var(--text-main))' }}>Santo Domingo</h1>
-          <p className="text-muted" style={{ fontWeight: '500', fontSize: '14px' }}>Sistema de Agenda Parroquial</p>
+      <div className="card glass-panel animate-fade-in" style={{ width: '100%', maxWidth: '400px', margin: '20px', display: 'flex', flexDirection: 'column', zIndex: 10, padding: '40px 24px', borderRadius: '20px' }}>
+        <div className="text-center" style={{ marginBottom: '32px' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '6px', color: '#1a1a1a', letterSpacing: '-0.5px' }}>Santo Domingo</h1>
+          <p style={{ fontWeight: '500', fontSize: '13px', color: '#787671' }}>Sistema de Agenda Parroquial</p>
         </div>
 
         {error && (
@@ -54,10 +54,10 @@ export default function LoginPage() {
         )}
 
         <form onSubmit={handleLogin} className="flex-col">
-          <div className="input-group">
-            <label htmlFor="email">Correo Electrónico</label>
+          <div style={{ marginBottom: '16px' }}>
+            <label htmlFor="email" style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#787671', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>Correo Electrónico</label>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <Mail style={{ position: 'absolute', left: '0.75rem', color: 'hsl(var(--text-muted))' }} size={18} />
+              <Mail style={{ position: 'absolute', left: '12px', color: '#a4a097' }} size={16} />
               <input
                 id="email"
                 type="email"
@@ -71,10 +71,10 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="input-group">
-            <label htmlFor="password">Contraseña</label>
+          <div style={{ marginBottom: '24px' }}>
+            <label htmlFor="password" style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#787671', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>Contraseña</label>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <Lock style={{ position: 'absolute', left: '0.75rem', color: 'hsl(var(--text-muted))' }} size={18} />
+              <Lock style={{ position: 'absolute', left: '12px', color: '#a4a097' }} size={16} />
               <input
                 id="password"
                 type="password"
@@ -90,9 +90,9 @@ export default function LoginPage() {
 
           <button 
             type="submit" 
-            className="btn btn-primary w-full mt-4" 
+            className="btn btn-primary w-full" 
             disabled={isSubmitting}
-            style={{ marginTop: '1rem', width: '100%' }}
+            style={{ padding: '12px', fontSize: '14px', borderRadius: '12px' }}
           >
             {isSubmitting ? 'Iniciando sesión...' : 'Ingresar al Sistema'}
           </button>

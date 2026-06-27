@@ -23,13 +23,16 @@
   --radius-xl: 16px;
   
   /* Tint Backgrounds */
-  --tint-peach: 28 100% 92%; /* #ffe8d4 */
-  --tint-mint: 138 52% 90%;  /* #d9f3e1 */
-  --tint-yellow: 49 97% 92%; /* #fef7d6 */
+  --tint-peach: 28 100% 92%;    /* #ffe8d4 */
+  --tint-mint: 138 52% 90%;     /* #d9f3e1 */
+  --tint-yellow: 49 97% 92%;    /* #fef7d6 */
+  --tint-lavender: 247 61% 95%; /* #ece9f9 */
 
   /* Minimal Shadows */
   --shadow-subtle: 0px 1px 2px 0px rgba(15, 15, 15, 0.04);
   --shadow-card: 0px 4px 12px 0px rgba(15, 15, 15, 0.08);
+  
+  --danger: 0 72% 51%; /* #e03131 */
 }
 
 [data-theme='dark'] {
@@ -52,9 +55,14 @@
   --tint-peach: 20 40% 20%;
   --tint-mint: 140 30% 20%;
   --tint-yellow: 50 40% 20%;
+  --tint-lavender: 247 40% 22%;
   
   --shadow-subtle: 0px 1px 2px 0px rgba(0, 0, 0, 0.3);
   --shadow-card: 0px 4px 12px 0px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 * {
@@ -247,5 +255,80 @@ p {
   .mobile-flex { display: flex !important; }
   .mobile-block { display: block !important; }
   .mobile-p-4 { padding: 16px !important; }
-  .card { padding: 16px; } /* Smaller card padding on mobile */
+  .card { padding: 16px; }
+}
+
+/* ─── Animations & Transitions ─── */
+
+/* Modal overlay fade */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Bottom sheet slide up */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* Gentle fade-scale for page content */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Pulse for loading states */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* Apply slide-up to all bottom sheet modals */
+.modal-overlay {
+  animation: fadeIn 0.22s ease forwards;
+}
+.modal-sheet {
+  animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+/* Page content entrance */
+.page-content {
+  animation: fadeInUp 0.25s ease forwards;
+}
+
+/* Smooth button press feedback */
+.btn {
+  transition: transform 0.1s ease, opacity 0.1s ease, background-color 0.15s ease !important;
+}
+.btn:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+/* Nav item transition */
+.nav-item-transition {
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+/* Card hover / press */
+.card-interactive {
+  transition: box-shadow 0.18s ease, transform 0.12s ease;
+}
+.card-interactive:active {
+  transform: scale(0.985);
+}
+
+/* Input focus transition already set above; reinforce */
+.input {
+  transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+}
+.input:focus {
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.12);
+}
+
+/* Safe-area bottom padding helper (Capacitor WebView) */
+.safe-bottom {
+  /* Capacitor WebView may not support env(); use fixed 70px (navbar) + 14px gutter */
+  padding-bottom: 84px !important;
 }

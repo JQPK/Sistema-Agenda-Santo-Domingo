@@ -5,68 +5,59 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, addDoc, doc, deleteDoc, serverTimestamp } from 'firebase/firestore';
-import { Plus, Trash2, MapPin, Shield } from 'lucide-react';
+import { Plus, Trash2, MapPin, Shield, X, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function CapillasPage() {
   const { userData } = useAuth();
   const [capillas, setCapillas] = useState([]);
   const [loading, setLoading] = useState(true);
-  
   const [nombre, setNombre] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    fetchCapillas();
-  }, []);
+  useEffect(() => { fetchCapillas(); }, []);
 
   const fetchCapillas = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, 'locations'));
-      const capillasData = [];
-      querySnapshot.forEach((doc) => {
-        if (doc.data().type === 'Capilla') {
-          capillasData.push({ id: doc.id, ...doc.data() });
-        }
-      });
-      setCapillas(capillasData);
-    } catch (error) {
-      console.error("Error fetching capillas:", error);
-    } finally {
-      setLoading(false);
-    }
+      const snap = await getDocs(collection(db, 'locations'));
+      setCapillas(snap.docs.filter(d => d.data().type === 'Capilla').map(d => ({ id: d.id, ...d.data() })));
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
   };
 
   const handleSaveCapilla = async (e) => {
     e.preventDefault();
     if (!nombre) return;
-
     try {
-      await addDoc(collection(db, 'locations'), {
-        name: nombre,
-        type: 'Capilla',
-        createdAt: serverTimestamp()
+      const docRef = await addDoc(collection(db, 'locations'), { name: nombre, type: 'Capilla', createdAt: serverTimestamp() });
+      // Notificación automática
+      await addDoc(collection(db, 'notifications'), {
+        title: `Nueva capilla registrada`,
+        message: `Se agregó "${nombre}" al listado de capillas.`,
+        type: 'capilla',
+        refId: docRef.id,
+        createdAt: serverTimestamp(),
+        read: false,
       });
-      setIsModalOpen(false);
-      setNombre('');
-      fetchCapillas();
-    } catch (error) {
-      console.error("Error saving capilla:", error);
-    }
+      setIsModalOpen(false); setNombre(''); fetchCapillas();
+    } catch (e) { console.error(e); }
   };
 
   const handleDeleteCapilla = async (id) => {
     if (window.confirm('¿Seguro que deseas eliminar esta capilla?')) {
-      await deleteDoc(doc(db, 'locations', id));
-      fetchCapillas();
+      await deleteDoc(doc(db, 'locations', id)); fetchCapillas();
     }
   };
 
   if (userData?.rol !== 'parroco') {
     return (
       <DashboardLayout>
-        <div className="card glass">
-          <h2 className="text-xl text-red-600 flex items-center gap-2"><Shield /> Acceso Denegado</h2>
-          <p className="mt-2 text-muted">Solo el párroco tiene permisos para administrar capillas.</p>
+        <div style={{ backgroundColor: '#fff0f0', border: '1px solid #fcc', borderRadius: '12px', padding: '24px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <Shield size={24} color="#e03131" />
+          <div>
+            <p style={{ fontWeight: '600', color: '#e03131', margin: 0 }}>Acceso Denegado</p>
+            <p style={{ color: '#787671', fontSize: '13px', margin: 0, marginTop: '4px' }}>Solo el párroco puede administrar capillas.</p>
+          </div>
         </div>
       </DashboardLayout>
     );
@@ -74,64 +65,92 @@ export default function CapillasPage() {
 
   return (
     <DashboardLayout>
-      <header className="flex items-center justify-between mb-8">
-        <h1 style={{ fontSize: '2rem' }}>Gestión de Capillas</h1>
-        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-          <Plus size={18} /> Nueva Capilla
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px', gap: '12px' }}>
+        <div>
+          <p style={{ fontSize: '12px', fontWeight: '600', color: '#787671', textTransform: 'uppercase', letterSpacing: '0.08em', margin: 0 }}>Administración</p>
+          <h1 style={{ fontSize: '24px', fontWeight: '600', color: '#1a1a1a', margin: 0, letterSpacing: '-0.3px' }}>Capillas</h1>
+        </div>
+        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)} style={{ fontSize: '13px', padding: '9px 14px', flexShrink: 0 }}>
+          <Plus size={15} /> Nueva
         </button>
-      </header>
+      </div>
 
-      {isModalOpen && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div className="card" style={{ width: '100%', maxWidth: '400px' }}>
-            <h2 className="text-xl font-bold mb-4">Agregar Capilla</h2>
-            <form onSubmit={handleSaveCapilla}>
-              <div className="input-group">
-                <label>Nombre de la Capilla</label>
-                <input className="input" value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Ej. Capilla San Juan" required />
-              </div>
-              <div className="flex justify-end gap-2 mt-4">
-                <button type="button" className="btn btn-secondary" onClick={() => setIsModalOpen(false)}>Cancelar</button>
-                <button type="submit" className="btn btn-primary">Guardar</button>
-              </div>
-            </form>
+      {/* Fixed locations info card */}
+      <div style={{ backgroundColor: '#f6f5f4', borderRadius: '12px', padding: '16px 20px', marginBottom: '20px', border: '1px solid #e5e3df' }}>
+        <p style={{ fontSize: '12px', fontWeight: '600', color: '#787671', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0, marginBottom: '12px' }}>Lugares Fijos</p>
+        {['Templo Central', 'Sacristía'].map(lugar => (
+          <div key={lugar} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: '1px solid #e5e3df' }}>
+            <MapPin size={16} color="#5645d4" style={{ flexShrink: 0 }} />
+            <p style={{ fontSize: '14px', fontWeight: '500', color: '#37352f', margin: 0 }}>{lugar}</p>
           </div>
+        ))}
+      </div>
+
+      {/* Capillas list */}
+      <p style={{ fontSize: '12px', fontWeight: '600', color: '#787671', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 12px' }}>Capillas Registradas</p>
+
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '48px', color: '#a4a097' }}>Cargando...</div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {capillas.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#a4a097', border: '1px dashed #e5e3df', borderRadius: '12px' }}>
+              <MapPin size={28} style={{ margin: '0 auto 10px', opacity: 0.4 }} />
+              <p style={{ fontSize: '14px', fontWeight: '500' }}>Sin capillas registradas</p>
+              <p style={{ fontSize: '13px', marginTop: '4px' }}>Usa el botón "Nueva" para añadir una</p>
+            </div>
+          )}
+          {capillas.map(c => (
+            <div key={c.id} style={{ backgroundColor: '#ffffff', border: '1px solid #e5e3df', borderRadius: '12px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: '#ffe8d4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <MapPin size={18} color="#dd5b00" />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: '14px', fontWeight: '600', color: '#1a1a1a', margin: 0 }}>{c.name}</p>
+                <p style={{ fontSize: '12px', color: '#a4a097', margin: 0, marginTop: '2px' }}>Capilla · Registro activo</p>
+              </div>
+              <button onClick={() => handleDeleteCapilla(c.id)} style={{ padding: '7px', borderRadius: '8px', border: '1px solid #fcc', backgroundColor: 'transparent', cursor: 'pointer', color: '#e03131', flexShrink: 0 }}>
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
         </div>
       )}
 
-      <div className="card glass">
-        {loading ? (
-          <p>Cargando capillas...</p>
-        ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid hsl(var(--border))', textAlign: 'left' }}>
-                <th style={{ padding: '1rem' }}>Nombre</th>
-                <th style={{ padding: '1rem', width: '100px' }}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {capillas.map(c => (
-                <tr key={c.id} style={{ borderBottom: '1px solid hsl(var(--border))' }}>
-                  <td style={{ padding: '1rem' }} className="flex items-center gap-2">
-                    <MapPin size={16} className="text-muted" /> {c.name}
-                  </td>
-                  <td style={{ padding: '1rem' }}>
-                    <button className="text-red-500 hover:text-red-700" onClick={() => handleDeleteCapilla(c.id)}>
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {capillas.length === 0 && (
-                <tr>
-                  <td colSpan="2" style={{ padding: '1rem', textAlign: 'center', color: 'hsl(var(--text-muted))' }}>No hay capillas registradas.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      {/* Modal */}
+      <AnimatePresence>
+        {isModalOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+            style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 100 }}
+          >
+            <motion.form 
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              onSubmit={handleSaveCapilla} 
+              style={{ backgroundColor: '#ffffff', borderRadius: '16px 16px 0 0', width: '100%', maxWidth: '480px', maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}
+            >
+              {/* Header fijo */}
+              <div style={{ padding: '18px 20px', borderBottom: '1px solid #e5e3df', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+                <p style={{ fontSize: '16px', fontWeight: '500', color: '#1a1a1a', margin: 0, letterSpacing: '-0.2px' }}>Nueva capilla</p>
+                <button type="button" onClick={() => setIsModalOpen(false)} style={{ width: '28px', height: '28px', borderRadius: '50%', border: '1px solid #e5e3df', cursor: 'pointer', background: '#f6f5f4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={14} /></button>
+              </div>
+              {/* Zona scrollable */}
+              <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
+                <div className="input-group">
+                  <label style={{ fontSize: '12px', fontWeight: '500', color: '#787671', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Nombre de la Capilla</label>
+                  <input className="input" value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Ej. Capilla San Juan" required />
+                </div>
+              </div>
+              {/* Botones siempre visibles */}
+              <div style={{ padding: '14px 20px', paddingBottom: 'calc(16px + env(safe-area-inset-bottom))', borderTop: '1px solid #e5e3df', display: 'flex', gap: '10px', flexShrink: 0, backgroundColor: '#ffffff' }}>
+                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setIsModalOpen(false)}>Cancelar</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Guardar</button>
+              </div>
+            </motion.form>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </DashboardLayout>
   );
 }
